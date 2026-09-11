@@ -49,6 +49,7 @@
         <div class="space-y-1">
 
             <x-layout.sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                <x-heroicon-o-squares-2x2 class="size-5 shrink-0" />
                 Dashboard
             </x-layout.sidebar-link>
 
@@ -61,13 +62,13 @@
                 Management
             </p>
 
-            <div class="mt-3 space-y-1">
+            @can('users.view')
+                <x-layout.sidebar-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    <x-heroicon-o-users class="size-5 shrink-0" />
 
-                <x-layout.sidebar-link href="#" :active="request()->routeIs('users.*')">
-                    Users
+                    <span>Users</span>
                 </x-layout.sidebar-link>
-
-            </div>
+            @endcan
 
         </div>
 
@@ -85,6 +86,7 @@
                 </x-layout.sidebar-link>
 
                 <x-layout.sidebar-link href="#">
+                    <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" />
                     Settings
                 </x-layout.sidebar-link>
 

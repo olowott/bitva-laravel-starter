@@ -15,10 +15,7 @@
 
     <div class="flex items-center justify-between gap-4">
 
-        <form
-            method="POST"
-            action="{{ route('verification.send') }}"
-        >
+        <form method="POST" action="{{ route('verification.send') }}">
             @csrf
 
             <x-ui.button type="submit">
@@ -26,16 +23,10 @@
             </x-ui.button>
         </form>
 
-        <form
-            method="POST"
-            action="{{ route('logout') }}"
-        >
+        <form method="POST" action="{{ route('logout') }}">
             @csrf
 
-            <button
-                type="submit"
-                class="text-sm font-medium text-slate-600 hover:text-slate-900"
-            >
+            <button type="submit" class="text-sm font-medium text-slate-600 hover:text-slate-900">
                 Log Out
             </button>
         </form>
