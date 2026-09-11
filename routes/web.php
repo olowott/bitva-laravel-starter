@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RoleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,6 +56,19 @@ Route::middleware(['auth', 'active', 'verified'])
         Route::delete('/users/{user}', [UserController::class, 'destroy'])
             ->middleware('can:users.delete')
             ->name('users.destroy');
+
+        //ROLE
+        Route::get('/roles', [RoleController::class, 'index'])
+            ->middleware('can:roles.view')
+            ->name('roles.index');
+
+        Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])
+            ->middleware('can:roles.manage')
+            ->name('roles.edit');
+
+        Route::put('/roles/{role}', [RoleController::class, 'update'])
+            ->middleware('can:roles.manage')
+            ->name('roles.update');
     });
 
 require __DIR__ . '/auth.php';

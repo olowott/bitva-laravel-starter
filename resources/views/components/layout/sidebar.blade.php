@@ -70,6 +70,14 @@
                 </x-layout.sidebar-link>
             @endcan
 
+            @can('roles.view')
+                <x-layout.sidebar-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
+                    <x-heroicon-o-shield-check class="size-5 shrink-0" />
+
+                    <span>Roles & Permissions</span>
+                </x-layout.sidebar-link>
+            @endcan
+
         </div>
 
 
