@@ -31,82 +31,80 @@
         </div>
     @endif
 
-    <x-ui.card class="mt-6">
-    <form
-        method="GET"
-        action="{{ route('admin.users.index') }}"
-        class="grid gap-4 md:grid-cols-4"
-    >
-        <div class="md:col-span-2">
-            <x-form.input
-                name="search"
-                label="Search"
-                placeholder="Search by name or email..."
-                :value="request('search')"
-            />
-        </div>
+    <x-ui.filter-panel :action="route('admin.users.index')" class="mt-6">
 
-        <div>
-            <x-form.select
-                name="role"
-                label="Role"
-            >
-                <option value="">All roles</option>
+    <div class="md:col-span-2">
+        <x-form.input
+            name="search"
+            label="Search"
+            placeholder="Search by name or email..."
+            :value="request('search')"
+        />
+    </div>
 
-                @foreach ($roles as $role)
-                    <option
-                        value="{{ $role->name }}"
-                        @selected(request('role') === $role->name)
-                    >
-                        {{ str($role->name)->replace('_', ' ')->title() }}
-                    </option>
-                @endforeach
-            </x-form.select>
-        </div>
+    <div>
+        <x-form.select
+            name="role"
+            label="Role"
+        >
+            <option value="">All roles</option>
 
-        <div>
-            <x-form.select
-                name="status"
-                label="Status"
-            >
-                <option value="">All statuses</option>
+            @foreach ($roles as $role)
                 <option
-                    value="active"
-                    @selected(request('status') === 'active')
+                    value="{{ $role->name }}"
+                    @selected(request('role') === $role->name)
                 >
-                    Active
+                    {{ str($role->name)->replace('_', ' ')->title() }}
                 </option>
-                <option
-                    value="inactive"
-                    @selected(request('status') === 'inactive')
-                >
-                    Inactive
-                </option>
-            </x-form.select>
-        </div>
+            @endforeach
+        </x-form.select>
+    </div>
 
-        <div class="flex items-end gap-3 md:col-span-4">
-            <x-ui.button type="submit">
-                <x-heroicon-o-funnel class="mr-2 size-4" />
-                Apply Filters
-            </x-ui.button>
+    <div>
+        <x-form.select
+            name="status"
+            label="Status"
+        >
+            <option value="">All statuses</option>
 
-            @if (
-                request()->filled('search')
-                || request()->filled('role')
-                || request()->filled('status')
-            )
-                <a
-                    href="{{ route('admin.users.index') }}"
-                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                >
-                    <x-heroicon-o-x-mark class="mr-2 size-4" />
-                    Clear
-                </a>
-            @endif
-        </div>
-    </form>
-</x-ui.card>
+            <option
+                value="active"
+                @selected(request('status') === 'active')
+            >
+                Active
+            </option>
+
+            <option
+                value="inactive"
+                @selected(request('status') === 'inactive')
+            >
+                Inactive
+            </option>
+        </x-form.select>
+    </div>
+
+    <div class="flex items-end gap-3 md:col-span-4">
+        <x-ui.button type="submit">
+            <x-heroicon-o-funnel class="mr-2 size-4" />
+            Apply Filters
+        </x-ui.button>
+
+        @if (
+            request()->filled('search')
+            || request()->filled('role')
+            || request()->filled('status')
+        )
+            <a
+                href="{{ route('admin.users.index') }}"
+                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+                <x-heroicon-o-x-mark class="mr-2 size-4" />
+                Clear
+            </a>
+        @endif
+    </div>
+
+</x-ui.filter-panel>
 
     <x-ui.card class="mt-6">
 

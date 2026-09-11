@@ -258,4 +258,36 @@ class UserManagementTest extends TestCase
             ->assertSee('Admin Person')
             ->assertDontSee('Regular Person');
     }
+
+    public function test_users_can_be_searched_by_name_or_email(): void
+    {
+        $superAdmin = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $superAdmin->assignRole('super_admin');
+
+        User::factory()->create([
+            'name' => 'John Example',
+            'email' => 'john@example.com',
+            'is_active' => true,
+        ]);
+
+        User::factory()->create([
+            'name' => 'Mary Example',
+            'email' => 'mary@example.com',
+            'is_active' => true,
+        ]);
+
+        $response = $this
+            ->actingAs($superAdmin)
+            ->get(route('admin.users.index', [
+                'search' => 'john',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSee('John Example')
+            ->assertDontSee('Mary Example');
+    }
 }
