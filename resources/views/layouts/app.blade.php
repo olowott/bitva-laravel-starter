@@ -8,7 +8,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
-        {{ isset($title) ? $title . ' | ' : '' }}{{ config('app.name') }}
+        @yield('title', config('app.name'))
+        | {{ config('app.name') }}
     </title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -26,13 +27,7 @@
 
             <main class="px-4 py-6 sm:px-6 lg:px-8">
 
-                @isset($header)
-                    <div class="mb-6">
-                        {{ $header }}
-                    </div>
-                @endisset
-
-                {{ $slot }}
+                @yield('content')
 
             </main>
 

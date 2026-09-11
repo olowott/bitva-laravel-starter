@@ -1,20 +1,14 @@
-<x-layouts.app>
+@extends('layouts.app')
 
-    <x-slot:title>
-        Dashboard
-    </x-slot:title>
+@section('title', 'Dashboard')
 
-    <x-slot:header>
+@section('content')
 
-        <x-layout.page-header title="Dashboard" description="Overview of your application." />
+    <x-layout.page-header title="Dashboard" description="Overview of your application." />
 
-    </x-slot:header>
-
-
-    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
         <x-ui.card>
-
             <p class="text-sm font-medium text-slate-500">
                 Total Users
             </p>
@@ -22,12 +16,9 @@
             <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
                 {{ \App\Models\User::count() }}
             </p>
-
         </x-ui.card>
 
-
         <x-ui.card>
-
             <p class="text-sm font-medium text-slate-500">
                 Active
             </p>
@@ -35,12 +26,9 @@
             <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
                 0
             </p>
-
         </x-ui.card>
 
-
         <x-ui.card>
-
             <p class="text-sm font-medium text-slate-500">
                 Pending
             </p>
@@ -48,12 +36,9 @@
             <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
                 0
             </p>
-
         </x-ui.card>
 
-
         <x-ui.card>
-
             <p class="text-sm font-medium text-slate-500">
                 This Month
             </p>
@@ -61,16 +46,13 @@
             <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
                 0
             </p>
-
         </x-ui.card>
 
     </div>
 
-
     <div class="mt-6 grid gap-6 xl:grid-cols-3">
 
         <x-ui.card class="xl:col-span-2">
-
             <h2 class="text-base font-semibold text-slate-900">
                 Getting Started
             </h2>
@@ -79,12 +61,9 @@
                 This application is powered by the BitVa Laravel Starter.
                 Project modules will appear here as they are enabled.
             </p>
-
         </x-ui.card>
 
-
         <x-ui.card>
-
             <h2 class="text-base font-semibold text-slate-900">
                 System
             </h2>
@@ -113,9 +92,8 @@
                 </div>
 
             </dl>
-
         </x-ui.card>
 
     </div>
 
-</x-layouts.app>
+@endsection
