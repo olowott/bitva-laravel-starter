@@ -1,17 +1,121 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+<x-layouts.app>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
+    <x-slot:title>
+        Dashboard
+    </x-slot:title>
+
+    <x-slot:header>
+
+        <x-layout.page-header title="Dashboard" description="Overview of your application." />
+
+    </x-slot:header>
+
+
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+        <x-ui.card>
+
+            <p class="text-sm font-medium text-slate-500">
+                Total Users
+            </p>
+
+            <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                {{ \App\Models\User::count() }}
+            </p>
+
+        </x-ui.card>
+
+
+        <x-ui.card>
+
+            <p class="text-sm font-medium text-slate-500">
+                Active
+            </p>
+
+            <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                0
+            </p>
+
+        </x-ui.card>
+
+
+        <x-ui.card>
+
+            <p class="text-sm font-medium text-slate-500">
+                Pending
+            </p>
+
+            <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                0
+            </p>
+
+        </x-ui.card>
+
+
+        <x-ui.card>
+
+            <p class="text-sm font-medium text-slate-500">
+                This Month
+            </p>
+
+            <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                0
+            </p>
+
+        </x-ui.card>
+
     </div>
-</x-app-layout>
+
+
+    <div class="mt-6 grid gap-6 xl:grid-cols-3">
+
+        <x-ui.card class="xl:col-span-2">
+
+            <h2 class="text-base font-semibold text-slate-900">
+                Getting Started
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                This application is powered by the BitVa Laravel Starter.
+                Project modules will appear here as they are enabled.
+            </p>
+
+        </x-ui.card>
+
+
+        <x-ui.card>
+
+            <h2 class="text-base font-semibold text-slate-900">
+                System
+            </h2>
+
+            <dl class="mt-4 space-y-3 text-sm">
+
+                <div class="flex justify-between gap-4">
+                    <dt class="text-slate-500">Laravel</dt>
+                    <dd class="font-medium text-slate-900">
+                        {{ app()->version() }}
+                    </dd>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <dt class="text-slate-500">PHP</dt>
+                    <dd class="font-medium text-slate-900">
+                        {{ PHP_VERSION }}
+                    </dd>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <dt class="text-slate-500">Environment</dt>
+                    <dd class="font-medium text-slate-900">
+                        {{ app()->environment() }}
+                    </dd>
+                </div>
+
+            </dl>
+
+        </x-ui.card>
+
+    </div>
+
+</x-layouts.app>
