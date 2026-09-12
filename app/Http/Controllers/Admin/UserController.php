@@ -13,12 +13,15 @@ use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 use App\Services\ActivityLogService;
 use App\Concerns\HandlesTableSorting;
+use App\Queries\UserQuery;
 
 class UserController extends Controller
 {
     use HandlesTableSorting;
 
-    public function index(Request $request): View
+
+
+    public function index(Request $request, UserQuery $userQuery): View
     {
 
         [$sort, $direction] = $this->resolveTableSort(

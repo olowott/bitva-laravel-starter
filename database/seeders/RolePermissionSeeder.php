@@ -27,6 +27,9 @@ class RolePermissionSeeder extends Seeder
             'documents.upload',
             'documents.download',
             'documents.delete',
+
+            'users.export',
+            'activity.export',
         ];
 
         foreach ($permissions as $permission) {
@@ -60,6 +63,8 @@ class RolePermissionSeeder extends Seeder
             'documents.view',
             'documents.upload',
             'documents.download',
+            'users.export',
+            'activity.export',
         ]);
     }
 }
