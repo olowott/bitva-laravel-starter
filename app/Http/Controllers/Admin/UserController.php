@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
+use App\Services\ActivityLogService;
 
 class UserController extends Controller
 {
@@ -64,8 +65,10 @@ class UserController extends Controller
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(StoreUserRequest $request): RedirectResponse
-    {
+    public function store(
+        StoreUserRequest $request,
+        ActivityLogService $activityLogService
+    ): RedirectResponse {
         $validated = $request->validated();
 
         $user = User::create([
@@ -83,6 +86,20 @@ class UserController extends Controller
         } else {
             $user->assignRole('user');
         }
+
+        $activityLogService->log(
+            'User created',
+            $user,
+            [
+                'after' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_active' => $user->is_active,
+                    'role' => $user->getRoleNames()->first(),
+                ],
+            ],
+            'created'
+        );
 
         return redirect()
             ->route('admin.users.index')
@@ -103,9 +120,17 @@ class UserController extends Controller
 
     public function update(
         UpdateUserRequest $request,
-        User $user
+        User $user,
+        ActivityLogService $activityLogService
     ): RedirectResponse {
         $this->protectSuperAdmin($user);
+
+        $before = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_active' => $user->is_active,
+            'role' => $user->getRoleNames()->first(),
+        ];
 
         $validated = $request->validated();
 
@@ -136,6 +161,27 @@ class UserController extends Controller
             $user->syncRoles([$validated['role']]);
         }
 
+        $user->refresh();
+
+        $after = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_active' => $user->is_active,
+            'role' => $user->getRoleNames()->first(),
+        ];
+
+        if ($before !== $after) {
+            $activityLogService->log(
+                'User updated',
+                $user,
+                [
+                    'before' => $before,
+                    'after' => $after,
+                ],
+                'updated'
+            );
+        }
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User updated successfully.');
@@ -143,7 +189,8 @@ class UserController extends Controller
 
     public function destroy(
         Request $request,
-        User $user
+        User $user,
+        ActivityLogService $activityLogService
     ): RedirectResponse {
         if ($request->user()->is($user)) {
             return back()->with(
@@ -153,6 +200,20 @@ class UserController extends Controller
         }
 
         $this->protectSuperAdmin($user);
+
+        $activityLogService->log(
+            'User deleted',
+            $user,
+            [
+                'before' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_active' => $user->is_active,
+                    'role' => $user->getRoleNames()->first(),
+                ],
+            ],
+            'deleted'
+        );
 
         $user->delete();
 

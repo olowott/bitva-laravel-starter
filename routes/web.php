@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -79,6 +80,11 @@ Route::middleware(['auth', 'active', 'verified'])
         Route::put('/settings', [SettingsController::class, 'update'])
             ->middleware('can:settings.manage')
             ->name('settings.update');
+
+        //ACTIVITY LOG
+        Route::get('/activity', [ActivityLogController::class, 'index'])
+            ->middleware('can:activity.view')
+            ->name('activity.index');
     });
 
 require __DIR__ . '/auth.php';

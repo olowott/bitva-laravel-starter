@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Services\ActivityLogService;
 
 class RoleController extends Controller
 {
@@ -36,13 +37,41 @@ class RoleController extends Controller
 
     public function update(
         UpdateRoleRequest $request,
-        Role $role
+        Role $role,
+        ActivityLogService $activityLogService
     ): RedirectResponse {
         $this->protectSuperAdmin($role);
+
+        $before = $role->permissions()
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
 
         $role->syncPermissions(
             $request->validated('permissions', [])
         );
+
+
+        $role->refresh();
+
+        $after = $role->permissions()
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
+
+        if ($before !== $after) {
+            $activityLogService->log(
+                'Role permissions updated',
+                $role,
+                [
+                    'before' => $before,
+                    'after' => $after,
+                ],
+                'updated'
+            );
+        }
 
         return redirect()
             ->route('admin.roles.index')

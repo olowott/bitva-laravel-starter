@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Services\SettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use App\Services\ActivityLogService;
 
 class SettingsController extends Controller
 {
@@ -29,11 +30,36 @@ class SettingsController extends Controller
 
     public function update(
         UpdateSettingsRequest $request,
-        SettingService $settingService
+        SettingService $settingService,
+        ActivityLogService $activityLogService
     ): RedirectResponse {
-        $settingService->setMany(
-            $request->validated()
-        );
+
+        $validated = $request->validated();
+
+        $before = Setting::query()
+            ->whereIn('key', array_keys($validated))
+            ->pluck('value', 'key')
+            ->toArray();
+
+
+        $settingService->setMany($validated);
+
+        $after = Setting::query()
+            ->whereIn('key', array_keys($validated))
+            ->pluck('value', 'key')
+            ->toArray();
+
+        if ($before !== $after) {
+            $activityLogService->log(
+                'Application settings updated',
+                null,
+                [
+                    'before' => $before,
+                    'after' => $after,
+                ],
+                'updated'
+            );
+        }
 
         return redirect()
             ->route('admin.settings.edit')

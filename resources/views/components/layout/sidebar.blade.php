@@ -93,10 +93,12 @@
 
             <div class="mt-3 space-y-1">
 
-                <x-layout.sidebar-link href="#">
-                    <x-heroicon-o-clock class="size-5 shrink-0" />
-                    <span>Activity</span>
-                </x-layout.sidebar-link>
+                @can('activity.view')
+                    <x-layout.sidebar-link :href="route('admin.activity.index')" :active="request()->routeIs('admin.activity.*')">
+                        <x-heroicon-o-clock class="size-5 shrink-0" />
+                        <span>Activity</span>
+                    </x-layout.sidebar-link>
+                @endcan
 
                 @can('settings.view')
                     <x-layout.sidebar-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
@@ -105,10 +107,6 @@
                         <span>Settings</span>
                     </x-layout.sidebar-link>
                 @endcan
-
-
-
-
             </div>
 
         </div>
