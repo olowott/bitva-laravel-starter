@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
+
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
@@ -21,6 +22,11 @@ class RolePermissionSeeder extends Seeder
 
             'settings.view',
             'settings.manage',
+
+            'documents.view',
+            'documents.upload',
+            'documents.download',
+            'documents.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -51,6 +57,9 @@ class RolePermissionSeeder extends Seeder
             'users.update',
             'roles.view',
             'settings.view',
+            'documents.view',
+            'documents.upload',
+            'documents.download',
         ]);
     }
 }

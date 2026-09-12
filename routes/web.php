@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\DocumentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -58,6 +59,19 @@ Route::middleware(['auth', 'active', 'verified'])
         Route::delete('/users/{user}', [UserController::class, 'destroy'])
             ->middleware('can:users.delete')
             ->name('users.destroy');
+
+        //DOCUMENT
+        Route::post('/documents', [DocumentController::class, 'store'])
+            ->middleware('can:documents.upload')
+            ->name('documents.store');
+
+        Route::get('/documents/{document}/download', [DocumentController::class, 'download'])
+            ->middleware('can:documents.download')
+            ->name('documents.download');
+
+        Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])
+            ->middleware('can:documents.delete')
+            ->name('documents.destroy');
 
         //ROLE
         Route::get('/roles', [RoleController::class, 'index'])

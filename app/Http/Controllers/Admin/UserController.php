@@ -125,6 +125,11 @@ class UserController extends Controller
     {
         $this->protectSuperAdmin($user);
 
+        $user->load([
+            'roles',
+            'documents' => fn($query) => $query->latest(),
+        ]);
+
         $roles = $this->availableRoles();
 
         return view(
