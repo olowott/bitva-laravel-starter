@@ -12,11 +12,25 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 use App\Services\ActivityLogService;
+use App\Concerns\HandlesTableSorting;
 
 class UserController extends Controller
 {
+    use HandlesTableSorting;
+
     public function index(Request $request): View
     {
+
+        [$sort, $direction] = $this->resolveTableSort(
+            $request,
+            [
+                'name',
+                'email',
+                'created_at',
+                'is_active',
+            ]
+        );
+
         $users = User::query()
             ->with('roles')
             ->when(
@@ -47,7 +61,8 @@ class UserController extends Controller
                     }
                 }
             )
-            ->latest()
+            ->orderBy($sort, $direction)
+            ->orderBy('id', $direction)
             ->paginate(15)
             ->withQueryString();
 

@@ -6,11 +6,25 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
+use App\Concerns\HandlesTableSorting;
 
 class ActivityLogController extends Controller
 {
+
+    use HandlesTableSorting;
+
     public function index(Request $request): View
     {
+
+        [$sort, $direction] = $this->resolveTableSort(
+            $request,
+            [
+                'description',
+                'event',
+                'created_at',
+            ]
+        );
+
         $activities = Activity::query()
             ->with(['causer', 'subject'])
             ->when(
@@ -28,7 +42,8 @@ class ActivityLogController extends Controller
                     $request->string('event')
                 )
             )
-            ->latest()
+            ->orderBy($sort, $direction)
+            ->orderBy('id', $direction)
             ->paginate(20)
             ->withQueryString();
 

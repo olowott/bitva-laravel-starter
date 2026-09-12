@@ -290,4 +290,58 @@ class UserManagementTest extends TestCase
             ->assertSee('John Example')
             ->assertDontSee('Mary Example');
     }
+
+    public function test_users_can_be_sorted_by_name_ascending(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        User::factory()->create([
+            'name' => 'Zulu User',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Alpha User',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.users.index', [
+                'sort' => 'name',
+                'direction' => 'asc',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Alpha User',
+                'Zulu User',
+            ]);
+    }
+
+    public function test_users_can_be_sorted_by_name_descending(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+
+        User::factory()->create([
+            'name' => 'Alpha User',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Zulu User',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.users.index', [
+                'sort' => 'name',
+                'direction' => 'desc',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Zulu User',
+                'Alpha User',
+            ]);
+    }
 }

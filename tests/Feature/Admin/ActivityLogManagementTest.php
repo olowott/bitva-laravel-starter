@@ -121,4 +121,92 @@ class ActivityLogManagementTest extends TestCase
             ->assertSee('Application settings updated')
             ->assertDontSee('User created');
     }
+
+    public function test_sorting_preserves_existing_filters(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('super_admin');
+
+        activity()
+            ->causedBy($user)
+            ->event('updated')
+            ->log('Application settings updated');
+
+        $response = $this->actingAs($user)
+            ->get(route('admin.activity.index', [
+                'search' => 'settings',
+                'event' => 'updated',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSee('search=settings', false)
+            ->assertSee('event=updated', false);
+    }
+
+    public function test_activity_logs_can_be_sorted_by_description(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('super_admin');
+
+        activity()
+            ->causedBy($user)
+            ->event('updated')
+            ->log('Zulu activity');
+
+        activity()
+            ->causedBy($user)
+            ->event('created')
+            ->log('Alpha activity');
+
+        $response = $this->actingAs($user)
+            ->get(route('admin.activity.index', [
+                'sort' => 'description',
+                'direction' => 'asc',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Alpha activity',
+                'Zulu activity',
+            ]);
+    }
+
+    public function test_activity_logs_can_be_sorted_by_created_date(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('super_admin');
+
+        $older = activity()
+            ->causedBy($user)
+            ->event('created')
+            ->log('Older activity');
+
+        $newer = activity()
+            ->causedBy($user)
+            ->event('updated')
+            ->log('Newer activity');
+
+        $older->update([
+            'created_at' => now()->subDay(),
+        ]);
+
+        $newer->update([
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('admin.activity.index', [
+                'sort' => 'created_at',
+                'direction' => 'desc',
+            ]));
+
+        $response
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Newer activity',
+                'Older activity',
+            ]);
+    }
 }

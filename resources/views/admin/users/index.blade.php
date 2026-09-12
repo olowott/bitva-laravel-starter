@@ -106,42 +106,86 @@
 
 </x-ui.filter-panel>
 
-    <x-ui.card class="mt-6">
+<x-ui.active-filters
+    class="mt-3"
+    :filters="[
+        'Search' => request('search'),
+        'Role' => request('role')
+            ? str(request('role'))->replace('_', ' ')->title()
+            : null,
+        'Status' => request('status')
+            ? str(request('status'))->title()
+            : null,
+    ]"
+    :clear-url="route('admin.users.index')"
+/>
 
-    
-        <div class="overflow-x-auto">
-@if ($users->count())
-            <table class="min-w-full divide-y divide-slate-200">
+ <div class="mt-6">
 
-                <thead>
-                    <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        <th class="px-4 py-3">                            User                        </th>
-                        <th class="px-4 py-3">                            Role                        </th>
-                        <th class="px-4 py-3">                            Status                        </th>
-                        <th class="px-4 py-3">                            Created                        </th>
-                        <th class="px-4 py-3 text-right">                            Actions                        </th>
-                    </tr>
-                </thead>
+    <x-table.index
+        :empty="$users->isEmpty()"
+        empty-title="No users found"
+        empty-description="Try changing your search or filters."
+    >
 
-                <tbody class="divide-y divide-slate-100">
+        <table class="min-w-full">
 
-                    @forelse ($users as $user)
+            <thead>
+                <x-table.header>
 
-                        <tr class="text-sm">
+                    <x-table.head>
+                        <x-table.sortable
+        column="name"
+        label="User"
+    />
+                    </x-table.head>
 
-                            <td class="px-4 py-4">
-                                <div class="font-medium text-slate-900">
-                                    {{ $user->name }}
-                                </div>
+                    <x-table.head>
+                        Role
+                    </x-table.head>
 
-                                <div class="mt-1 text-slate-500">
-                                    {{ $user->email }}
-                                </div>
-                            </td>
+                    <x-table.head>
+                        Status
+                    </x-table.head>
 
-                            <td class="px-4 py-4">
+                    <x-table.head>
+                         <x-table.sortable
+        column="created_at"
+        label="Created"
+    />
+                    </x-table.head>
 
-                                @forelse($user->roles as $role)
+                    <x-table.head align="right">
+                        Actions
+                    </x-table.head>
+
+                </x-table.header>
+            </thead>
+
+            <tbody>
+
+                @foreach ($users as $user)
+
+                    <x-table.row>
+
+                        <x-table.cell>
+
+                            <div class="font-medium text-slate-900">
+                                {{ $user->name }}
+                            </div>
+
+                            <div class="mt-1 text-slate-500">
+                                {{ $user->email }}
+                            </div>
+
+                        </x-table.cell>
+
+
+                        <x-table.cell>
+
+                            <div class="flex flex-wrap gap-2">
+
+                                @forelse ($user->roles as $role)
 
                                     <x-ui.badge
                                         :variant="$role->name === 'super_admin'
@@ -161,101 +205,89 @@
 
                                 @endforelse
 
-                            </td>
+                            </div>
 
-                            <td class="px-4 py-4">
-    <x-ui.badge :variant="$user->is_active ? 'success' : 'danger'">
-        {{ $user->is_active ? 'Active' : 'Inactive' }}
-    </x-ui.badge>
-</td>
+                        </x-table.cell>
 
-                            <td class="px-4 py-4 text-slate-500">
-                                {{ $user->created_at->format('d M Y') }}
-                            </td>
 
-                            <td class="px-4 py-4">
+                        <x-table.cell>
 
-                                <div class="flex items-center justify-end gap-3">
-
-                                    @can('users.update')
-
-                                        <a
-                                            href="{{ route('admin.users.edit', $user) }}"
-                                            class="text-sm font-medium text-brand-600 hover:text-brand-700"
-                                        >
-                                            Edit
-                                        </a>
-
-                                    @endcan
-
-                                    @can('users.delete')
-
-                                        @if(! auth()->user()->is($user))
-
-                                            <form
-                                                method="POST"
-                                                action="{{ route('admin.users.destroy', $user) }}"
-                                                onsubmit="return confirm('Delete this user?')"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button
-                                                    type="submit"
-                                                    class="text-sm font-medium text-red-600 hover:text-red-700"
-                                                >
-                                                    Delete
-                                                </button>
-
-                                            </form>
-
-                                        @endif
-
-                                    @endcan
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-                            <td
-                                colspan="4"
-                                class="px-4 py-12 text-center text-sm text-slate-500"
+                            <x-ui.badge
+                                :variant="$user->is_active ? 'success' : 'danger'"
                             >
-                                No users found.
-                            </td>
-                        </tr>
+                                {{ $user->is_active ? 'Active' : 'Inactive' }}
+                            </x-ui.badge>
 
-                    @endforelse
+                        </x-table.cell>
 
-                </tbody>
 
-            </table>
-@else
-    <div class="py-12 text-center">
-        <x-heroicon-o-users class="mx-auto size-10 text-slate-300" />
+                        <x-table.cell class="whitespace-nowrap text-slate-500">
 
-        <h3 class="mt-3 text-sm font-semibold text-slate-900">
-            No users found
-        </h3>
+                            {{ $user->created_at->format('d M Y') }}
 
-        <p class="mt-1 text-sm text-slate-500">
-            Try changing your search or filters.
-        </p>
-    </div>
-@endif
-        </div>
+                        </x-table.cell>
 
-        @if($users->hasPages())
-            <div class="mt-6 border-t border-slate-200 pt-5">
-                {{ $users->links() }}
-            </div>
-        @endif
 
-    </x-ui.card>
+                        <x-table.cell align="right">
+
+                            <div class="flex items-center justify-end gap-3">
+
+                                @can('users.update')
+
+                                    <a
+                                        href="{{ route('admin.users.edit', $user) }}"
+                                        class="text-sm font-medium text-brand-600 transition hover:text-brand-700"
+                                    >
+                                        Edit
+                                    </a>
+
+                                @endcan
+
+
+                                @can('users.delete')
+
+                                    @if (! auth()->user()->is($user))
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.users.destroy', $user) }}"
+                                            onsubmit="return confirm('Delete this user?')"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="text-sm font-medium text-red-600 transition hover:text-red-700"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    @endif
+
+                                @endcan
+
+                            </div>
+
+                        </x-table.cell>
+
+                    </x-table.row>
+
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+            <x-slot:footer>
+        <x-table.footer :paginator="$users" />
+    </x-slot:footer>
+
+    </x-table.index>
+
+
+</div>
 
 @endsection
