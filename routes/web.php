@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -99,6 +100,25 @@ Route::middleware(['auth', 'active', 'verified'])
         Route::get('/activity', [ActivityLogController::class, 'index'])
             ->middleware('can:activity.view')
             ->name('activity.index');
+
+        //NOTIFICATIONS
+        Route::get(
+            '/notifications',
+            [NotificationController::class, 'index']
+        )
+            ->name('notifications.index');
+
+        Route::patch(
+            '/notifications/{notification}/read',
+            [NotificationController::class, 'read']
+        )
+            ->name('notifications.read');
+
+        Route::patch(
+            '/notifications/read-all',
+            [NotificationController::class, 'readAll']
+        )
+            ->name('notifications.read-all');
     });
 
 require __DIR__ . '/auth.php';

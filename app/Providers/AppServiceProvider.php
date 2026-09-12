@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Services\SettingService;
+use App\View\Composers\TopbarComposer;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +32,10 @@ class AppServiceProvider extends ServiceProvider
                 ? true
                 : null;
         });
+
+        View::composer(
+            'components.layout.topbar',
+            TopbarComposer::class
+        );
     }
 }

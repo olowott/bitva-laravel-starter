@@ -6,7 +6,7 @@
 
     <x-layout.page-header title="Activity Logs" description="Review important administrative and system activity." />
 
-    <x-ui.filter-panel :action="route('admin.activity.index')" class="mt-6">
+    <x-ui.filter-panel :action="route('admin.activity.index')">
 
         <div class="md:col-span-2">
             <x-form.input name="search" label="Search" placeholder="Search activity description..." :value="request('search')" />

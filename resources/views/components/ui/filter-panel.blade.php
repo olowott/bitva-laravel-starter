@@ -1,6 +1,6 @@
 @props(['action', 'method' => 'GET'])
 
-<x-ui.card>
+<x-ui.card class="mt-6">
     <form method="{{ $method }}" action="{{ $action }}" {{ $attributes->class('grid gap-4 md:grid-cols-4') }}>
         {{ $slot }}
     </form>
