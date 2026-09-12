@@ -8,11 +8,21 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
-        @yield('title', config('app.name'))
-        | {{ config('app.name') }}
+        @hasSection('title')
+            @yield('title') |
+        @endif
+
+        {{ setting('app_name', config('app.name')) }}
     </title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        :root {
+            --app-primary: {{ setting('primary_color', '#4f5bd5') }};
+            --app-secondary: {{ setting('secondary_color', '#111827') }};
+        }
+    </style>
 </head>
 
 <body class="min-h-screen">

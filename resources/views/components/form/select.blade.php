@@ -1,32 +1,30 @@
 @props([
     'label' => null,
     'name',
-    'options' => [],
-    'value' => null,
-    'placeholder' => 'Select an option',
     'required' => false,
+    'messages' => null,
 ])
+
+@php
+    $fieldErrors = $messages ?? $errors->get($name);
+@endphp
 
 <div>
     @if ($label)
         <x-form.label :value="$label" :for="$name" />
     @endif
 
-    <select id="{{ $name }}" name="{{ $name }}" @required($required)
-        {{ $attributes->class([
-            'mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm',
-            'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20',
-        ]) }}>
-        <option value="">
-            {{ $placeholder }}
-        </option>
-
-        @foreach ($options as $optionValue => $optionLabel)
-            <option value="{{ $optionValue }}" @selected(old($name, $value) == $optionValue)>
-                {{ $optionLabel }}
-            </option>
-        @endforeach
+    <select id="{{ $attributes->get('id', $name) }}" name="{{ $name }}" @required($required)
+        {{ $attributes->except('id')->class([
+                'mt-1 block w-full rounded-xl border bg-white px-3 py-2.5',
+                'text-sm text-slate-900 shadow-sm transition',
+                'focus:outline-none focus:ring-2',
+                'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500',
+                'border-red-300 focus:border-red-500 focus:ring-red-500/20' => $fieldErrors,
+                'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20' => !$fieldErrors,
+            ]) }}>
+        {{ $slot }}
     </select>
 
-    <x-form.error :messages="$errors->get($name)" />
+    <x-form.error :messages="$fieldErrors" />
 </div>

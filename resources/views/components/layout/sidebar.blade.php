@@ -1,5 +1,5 @@
 {{-- Mobile backdrop --}}
-<div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-slate-950 lg:hidden"
+<div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden"
     @click="sidebarOpen = false"></div>
 
 <aside
@@ -7,6 +7,8 @@
            transition-transform duration-200 ease-in-out
            lg:translate-x-0"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+
+
     {{-- Brand --}}
     <div class="flex h-16 shrink-0 items-center border-b border-slate-200 px-6">
 
@@ -19,12 +21,14 @@
 
             <div>
                 <p class="text-sm font-semibold text-slate-900">
-                    BitVa
+                    {{ setting('app_name', 'BitVa') }}
                 </p>
 
-                <p class="text-xs text-slate-500">
-                    Application Suite
-                </p>
+                @if (setting('app_tagline'))
+                    <p class="text-xs text-slate-500">
+                        {{ setting('app_tagline') }}
+                    </p>
+                @endif
             </div>
         </a>
 
@@ -56,7 +60,7 @@
         </div>
 
 
-        <div class="mt-8">
+        <div class="mt-8 space-y-1">
 
             <p class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Management
@@ -90,13 +94,20 @@
             <div class="mt-3 space-y-1">
 
                 <x-layout.sidebar-link href="#">
-                    Activity
+                    <x-heroicon-o-clock class="size-5 shrink-0" />
+                    <span>Activity</span>
                 </x-layout.sidebar-link>
 
-                <x-layout.sidebar-link href="#">
-                    <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" />
-                    Settings
-                </x-layout.sidebar-link>
+                @can('settings.view')
+                    <x-layout.sidebar-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
+                        <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" />
+
+                        <span>Settings</span>
+                    </x-layout.sidebar-link>
+                @endcan
+
+
+
 
             </div>
 
@@ -105,7 +116,7 @@
     </nav>
 
 
-    {{-- Current user --}}
+    {{-- Current user  + Logout --}}
     <div class="shrink-0 border-t border-slate-200 p-4">
 
         <div class="flex items-center gap-3">
@@ -129,6 +140,17 @@
             </div>
 
         </div>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+
+            <button type="submit"
+                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-700">
+                <x-heroicon-o-arrow-left-on-rectangle class="size-5 shrink-0" />
+
+                <span>Logout</span>
+            </button>
+        </form>
 
     </div>
 

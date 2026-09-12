@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SettingsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -69,6 +70,15 @@ Route::middleware(['auth', 'active', 'verified'])
         Route::put('/roles/{role}', [RoleController::class, 'update'])
             ->middleware('can:roles.manage')
             ->name('roles.update');
+
+        // SETTINGS
+        Route::get('/settings', [SettingsController::class, 'edit'])
+            ->middleware('can:settings.view')
+            ->name('settings.edit');
+
+        Route::put('/settings', [SettingsController::class, 'update'])
+            ->middleware('can:settings.manage')
+            ->name('settings.update');
     });
 
 require __DIR__ . '/auth.php';
