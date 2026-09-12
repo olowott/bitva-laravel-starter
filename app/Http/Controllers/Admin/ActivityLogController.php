@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 use App\Concerns\HandlesTableSorting;
+use App\Queries\ActivityLogQuery;
 
 class ActivityLogController extends Controller
 {
 
     use HandlesTableSorting;
 
-    public function index(Request $request): View
+    public function index(Request $request, ActivityLogQuery $activityLogQuery): View
     {
 
         [$sort, $direction] = $this->resolveTableSort(
@@ -25,23 +26,8 @@ class ActivityLogController extends Controller
             ]
         );
 
-        $activities = Activity::query()
-            ->with(['causer', 'subject'])
-            ->when(
-                $request->filled('search'),
-                fn($query) => $query->where(
-                    'description',
-                    'like',
-                    '%' . $request->string('search') . '%'
-                )
-            )
-            ->when(
-                $request->filled('event'),
-                fn($query) => $query->where(
-                    'event',
-                    $request->string('event')
-                )
-            )
+        $activities = $activityLogQuery
+            ->build($request)
             ->orderBy($sort, $direction)
             ->orderBy('id', $direction)
             ->paginate(20)

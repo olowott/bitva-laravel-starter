@@ -4,9 +4,20 @@
 
 @section('content')
 
-    <x-layout.page-header title="Activity Logs" description="Review important administrative and system activity." />
+    <x-layout.page-header title="Activity Logs" description="Review important administrative and system activity.">
 
-    <x-ui.filter-panel :action="route('admin.activity.index')" class="mt-6">
+        <x-slot:actions>
+            @can('activity.export')
+                <x-ui.button :href="route('admin.activity.export', request()->query())" variant="secondary">
+                    <x-heroicon-o-arrow-down-tray class="mr-2 size-4" />
+
+                    Export CSV
+                </x-ui.button>
+            @endcan
+        </x-slot:actions>
+    </x-layout.page-header>
+
+    <x-ui.filter-panel :action="route('admin.activity.index')">
 
         <div class="md:col-span-2">
             <x-form.input name="search" label="Search" placeholder="Search activity description..." :value="request('search')" />

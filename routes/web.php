@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\Exports\UserExportController;
+use App\Http\Controllers\Admin\Exports\ActivityLogExportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,6 +38,13 @@ Route::middleware(['auth', 'active', 'verified'])
     ->name('admin.')
     ->group(function () {
 
+        //EXPORT
+        Route::get('/users/export', UserExportController::class)
+            ->middleware('can:users.export')
+            ->name('users.export');
+
+        //USERS
+    
         Route::get('/users', [UserController::class, 'index'])
             ->middleware('can:users.view')
             ->name('users.index');
@@ -96,9 +105,17 @@ Route::middleware(['auth', 'active', 'verified'])
             ->name('settings.update');
 
         //ACTIVITY LOG
+    
+        Route::get(
+            '/activity/export',
+            ActivityLogExportController::class
+        )->middleware('can:activity.export')->name('activity.export');
+
         Route::get('/activity', [ActivityLogController::class, 'index'])
             ->middleware('can:activity.view')
             ->name('activity.index');
+
+
     });
 
 require __DIR__ . '/auth.php';

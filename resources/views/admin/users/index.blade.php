@@ -9,12 +9,21 @@
         description="Manage people with access to this application."
     >
         <x-slot:actions>
+            @can('users.export')
+
+            <x-ui.button :href="route('admin.users.export', request()->query())"
+                variant="secondary">
+                <x-heroicon-o-arrow-down-tray class="mr-2 size-4" />
+                Export CSV
+            </x-ui.button>
+
+            @endcan
             @can('users.create')
-                <a href="{{ route('admin.users.create') }}">
-                    <x-ui.button>
-                        Add User
-                    </x-ui.button>
-                </a>
+                    <a href="{{ route('admin.users.create') }}">
+                        <x-ui.button>
+                            Add User
+                        </x-ui.button>
+                    </a>
             @endcan
         </x-slot:actions>
     </x-layout.page-header>
