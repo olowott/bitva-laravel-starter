@@ -29,7 +29,11 @@ class RolePermissionSeeder extends Seeder
             'documents.delete',
 
             'users.export',
+
+            'activity.view',
             'activity.export',
+
+            'notifications.send',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,13 +62,21 @@ class RolePermissionSeeder extends Seeder
             'users.view',
             'users.create',
             'users.update',
+
             'roles.view',
+
             'settings.view',
+
+            'activity.view',
+            'activity.export',
+
             'documents.view',
             'documents.upload',
             'documents.download',
+
             'users.export',
-            'activity.export',
+
+            'notifications.send',
         ]);
     }
 }

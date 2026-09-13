@@ -1,31 +1,33 @@
 @extends('layouts.app')
 
-@section('title', 'Profile')
+@section('title', 'My Profile')
 
 @section('content')
-
-    <x-layout.page-header title="Profile" description="Manage your account information and security settings." />
+    <x-layout.page-header title="My Profile"
+        description="Manage your personal information, profile photo and account security." />
 
     <div class="mt-6 space-y-6">
 
+        {{-- Profile Information --}}
         <x-ui.card>
-            <div class="max-w-2xl">
-                @include('profile.partials.update-profile-information-form')
-            </div>
+            @include('profile.partials.update-profile-information-form')
         </x-ui.card>
 
+        {{-- Password --}}
         <x-ui.card>
-            <div class="max-w-2xl">
-                @include('profile.partials.update-password-form')
-            </div>
+
+            @include('profile.partials.update-password-form')
+
         </x-ui.card>
 
-        <x-ui.card>
-            <div class="max-w-2xl">
+        {{-- Delete Account --}}
+        @unless (auth()->user()->hasRole('super_admin'))
+            <x-ui.card>
+
                 @include('profile.partials.delete-user-form')
-            </div>
-        </x-ui.card>
+
+            </x-ui.card>
+        @endunless
 
     </div>
-
 @endsection

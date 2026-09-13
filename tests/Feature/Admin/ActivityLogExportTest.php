@@ -122,4 +122,22 @@ class ActivityLogExportTest extends TestCase
             $content
         );
     }
+
+    public function test_activity_log_export_is_rate_limited(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('activity.export');
+
+        for ($i = 0; $i < 20; $i++) {
+            $this
+                ->actingAs($user)
+                ->get(route('admin.activity.export'))
+                ->assertOk();
+        }
+
+        $this
+            ->actingAs($user)
+            ->get(route('admin.activity.export'))
+            ->assertStatus(429);
+    }
 }

@@ -47,11 +47,10 @@
             </x-ui.button>
 
             @if (request()->filled('search') || request()->filled('event'))
-                <a href="{{ route('admin.activity.index') }}"
-                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                <x-ui.button :href="route('admin.activity.index')" variant="secondary">
                     <x-heroicon-o-x-mark class="mr-2 size-4" />
                     Clear
-                </a>
+                </x-ui.button>
             @endif
 
         </div>
@@ -110,11 +109,11 @@
 
                             <x-table.cell>
 
-                                <div class="font-medium text-slate-900">
+                                <div class="font-medium text-slate-900 dark:text-white">
                                     {{ $activity->description }}
                                 </div>
 
-                                <div class="mt-1 text-xs text-slate-400">
+                                <div class="mt-1 text-xs text-slate-400 dark:text-slate-200">
                                     #{{ $activity->id }}
                                 </div>
 
@@ -124,7 +123,7 @@
                             <x-table.cell>
 
                                 @if ($activity->causer)
-                                    <div class="font-medium text-slate-900">
+                                    <div class="font-medium text-slate-900 dark:text-white">
                                         {{ $activity->causer->name ?? 'User' }}
                                     </div>
 
@@ -134,7 +133,7 @@
                                         </div>
                                     @endif
                                 @else
-                                    <span class="text-slate-400">
+                                    <span class="text-slate-400 dark:text-slate-200">
                                         System
                                     </span>
                                 @endif
@@ -153,7 +152,7 @@
                                         ID: {{ $activity->subject_id }}
                                     </div>
                                 @else
-                                    <span class="text-slate-400">
+                                    <span class="text-slate-400 dark:text-slate-200">
                                         —
                                     </span>
                                 @endif
@@ -202,13 +201,16 @@
                                             View
                                         </summary>
 
-                                        <div class="mt-3 w-80 rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                        <div
+                                            class="mt-3 w-80 rounded-xl border border-slate-200
+    bg-slate-50 p-4 shadow-sm
+    dark:border-slate-700 dark:bg-slate-800">
                                             <pre class="whitespace-pre-wrap break-words text-xs text-slate-600">{{ json_encode($activity->properties->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                         </div>
 
                                     </details>
                                 @else
-                                    <span class="text-slate-400">
+                                    <span class="text-slate-400 dark:text-slate-200">
                                         —
                                     </span>
                                 @endif

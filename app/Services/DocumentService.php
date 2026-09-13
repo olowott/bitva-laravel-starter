@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class DocumentService
 {
@@ -14,17 +15,22 @@ class DocumentService
         UploadedFile $file,
         ?Model $documentable = null,
         ?string $category = null,
-        string $disk = 'local',
         array $metadata = []
     ): Document {
+        $disk = 'local';
+
         $directory = $this->directory(
             $documentable,
             $category
         );
 
-        $filename = Str::uuid()
-            . '.'
-            . $file->getClientOriginalExtension();
+        $extension = $file->extension();
+
+        $filename = (string) Str::uuid();
+
+        if ($extension) {
+            $filename .= '.' . $extension;
+        }
 
         $path = $file->storeAs(
             $directory,
@@ -32,29 +38,58 @@ class DocumentService
             $disk
         );
 
-        return Document::create([
-            'documentable_type' => $documentable?->getMorphClass(),
-            'documentable_id' => $documentable?->getKey(),
+        if (!$path) {
+            throw new \RuntimeException(
+                'The document could not be stored.'
+            );
+        }
 
-            'uploaded_by' => auth()->id(),
+        try {
+            $document = new Document();
 
-            'category' => $category,
+            $document->documentable_type =
+                $documentable?->getMorphClass();
 
-            'disk' => $disk,
-            'path' => $path,
+            $document->documentable_id =
+                $documentable?->getKey();
 
-            'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            $document->uploaded_by = auth()->id();
 
-            'metadata' => $metadata ?: null,
-        ]);
+            $document->category = $category;
+
+            $document->disk = $disk;
+            $document->path = $path;
+
+            $document->original_name =
+                $this->sanitizeOriginalName(
+                    $file->getClientOriginalName()
+                );
+
+            $document->mime_type = $file->getMimeType();
+            $document->size = $file->getSize();
+
+            $document->metadata =
+                $metadata ?: null;
+
+            $document->save();
+
+            return $document;
+        } catch (Throwable $exception) {
+            Storage::disk($disk)->delete($path);
+
+            throw $exception;
+        }
     }
 
     public function delete(Document $document): void
     {
-        Storage::disk($document->disk)
-            ->delete($document->path);
+        if ($document->disk === 'local') {
+            $disk = Storage::disk('local');
+
+            if ($disk->exists($document->path)) {
+                $disk->delete($document->path);
+            }
+        }
 
         $document->delete();
     }
@@ -76,9 +111,24 @@ class DocumentService
         }
 
         if ($category) {
-            $parts[] = Str::kebab($category);
+            $categorySlug = Str::slug($category);
+
+            if ($categorySlug !== '') {
+                $parts[] = $categorySlug;
+            }
         }
 
         return implode('/', $parts);
+    }
+
+    protected function sanitizeOriginalName(string $name): string
+    {
+        $name = basename($name);
+
+        return preg_replace(
+            '/[\x00-\x1F\x7F]/u',
+            '',
+            $name
+        ) ?: 'document';
     }
 }

@@ -184,4 +184,24 @@ class UserExportTest extends TestCase
             $content
         );
     }
+
+    public function test_user_export_is_rate_limited(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('users.export');
+
+        for ($i = 0; $i < 20; $i++) {
+            $this
+                ->actingAs($user)
+                ->get(route('admin.users.export'))
+                ->assertOk();
+        }
+
+        $this
+            ->actingAs($user)
+            ->get(route('admin.users.export'))
+            ->assertStatus(429);
+    }
+
+
 }

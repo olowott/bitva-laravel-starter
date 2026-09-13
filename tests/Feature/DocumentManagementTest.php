@@ -234,4 +234,36 @@ class DocumentManagementTest extends TestCase
             0
         );
     }
+
+    public function test_document_on_non_private_disk_cannot_be_downloaded(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('documents.download');
+
+        $document = new Document();
+
+        $document->documentable_type = User::class;
+        $document->documentable_id = $user->id;
+        $document->uploaded_by = $user->id;
+
+        $document->category = 'test';
+        $document->disk = 'public_assets';
+        $document->path = 'branding/example.png';
+
+        $document->original_name = 'example.png';
+        $document->mime_type = 'image/png';
+        $document->size = 100;
+
+        $document->save();
+
+        $this
+            ->actingAs($user)
+            ->get(
+                route(
+                    'admin.documents.download',
+                    $document
+                )
+            )
+            ->assertNotFound();
+    }
 }

@@ -36,6 +36,10 @@ class UpdateUserRequest extends FormRequest
                 'confirmed',
                 Password::defaults(),
             ],
+            'is_active' => [
+                'sometimes',
+                'boolean',
+            ],
 
             'role' => [
                 'nullable',

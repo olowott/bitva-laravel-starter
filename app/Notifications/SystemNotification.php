@@ -3,9 +3,11 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class SystemNotification extends Notification
+class SystemNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -14,14 +16,38 @@ class SystemNotification extends Notification
         public string $message,
         public ?string $url = null,
         public ?string $type = 'info',
+        public bool $sendEmail = false,
     ) {
     }
 
     public function via(object $notifiable): array
     {
-        return [
+        $channels = [
             'database',
         ];
+
+        if ($this->sendEmail) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject($this->title)
+            ->markdown('mail.system-notification', [
+                'recipientName' => $notifiable->name,
+                'title' => $this->title,
+                'message' => $this->message,
+                'actionUrl' => $this->url
+                    ? $this->resolveMailUrl()
+                    : null,
+                'actionLabel' => $this->url
+                    ? 'View Details'
+                    : null,
+            ]);
     }
 
     public function toArray(object $notifiable): array
@@ -32,5 +58,21 @@ class SystemNotification extends Notification
             'url' => $this->url,
             'type' => $this->type,
         ];
+    }
+
+    private function resolveMailUrl(): string
+    {
+        if (!$this->url) {
+            return url('/');
+        }
+
+        if (
+            str_starts_with($this->url, '/')
+            && !str_starts_with($this->url, '//')
+        ) {
+            return url($this->url);
+        }
+
+        return url('/');
     }
 }

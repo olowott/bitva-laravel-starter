@@ -4,22 +4,30 @@
     'emptyDescription' => null,
 ])
 
-<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+<div
+    class="overflow-hidden rounded-2xl border border-slate-200
+        bg-white shadow-sm
+        dark:border-slate-800 dark:bg-slate-900">
 
     @if ($empty)
 
         <div class="px-6 py-16 text-center">
 
-            <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+            <div
+                class="mx-auto flex size-12 items-center justify-center
+                    rounded-full bg-slate-100 text-slate-500
+                    dark:bg-slate-800 dark:text-slate-400">
                 <x-heroicon-o-inbox class="size-6" />
             </div>
 
-            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+            <h3 class="mt-4 text-sm font-semibold
+                    text-slate-900 dark:text-white">
                 {{ $emptyTitle }}
             </h3>
 
             @if ($emptyDescription)
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="mt-1 text-sm
+                        text-slate-500 dark:text-slate-400">
                     {{ $emptyDescription }}
                 </p>
             @endif

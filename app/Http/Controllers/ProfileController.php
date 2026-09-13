@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\Profile\AvatarService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,17 +25,45 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
+    public function update(
+        ProfileUpdateRequest $request,
+        AvatarService $avatarService
+    ): RedirectResponse {
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill(
+            $request->safe()->except('avatar')
+        );
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        if ($request->hasFile('avatar')) {
+            $avatarService->store(
+                $user,
+                $request->file('avatar')
+            );
+        }
+
+        return Redirect::route('profile.edit')
+            ->with('success', 'Profile updated successfully.');
+    }
+
+    public function destroyAvatar(
+        Request $request,
+        AvatarService $avatarService
+    ): RedirectResponse {
+        $avatarService->remove(
+            $request->user()
+        );
+
+        return back()->with(
+            'success',
+            'Profile photo removed successfully.'
+        );
     }
 
     /**
@@ -47,6 +76,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        abort_if(
+            $user->hasRole('super_admin'),
+            403,
+            'The super administrator account cannot be deleted.'
+        );
 
         Auth::logout();
 

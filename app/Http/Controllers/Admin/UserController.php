@@ -14,6 +14,7 @@ use Spatie\Permission\Models\Role;
 use App\Services\ActivityLogService;
 use App\Concerns\HandlesTableSorting;
 use App\Queries\UserQuery;
+use App\Notifications\SystemNotification;
 
 class UserController extends Controller
 {
@@ -87,7 +88,13 @@ class UserController extends Controller
         StoreUserRequest $request,
         ActivityLogService $activityLogService
     ): RedirectResponse {
+
         $validated = $request->validated();
+
+        $this->ensureRoleCanBeAssigned(
+            $request,
+            $validated['role'] ?? null
+        );
 
         $user = User::create([
             'name' => $validated['name'],
@@ -104,6 +111,18 @@ class UserController extends Controller
         } else {
             $user->assignRole('user');
         }
+
+
+        $user->notify(
+            new SystemNotification(
+                title: 'Your account has been created',
+                message: 'Your account has been created successfully.',
+                url: route('profile.edit', absolute: false),
+                type: 'success',
+                sendEmail: true,
+            )
+        );
+
 
         $activityLogService->log(
             'User created',
@@ -157,6 +176,36 @@ class UserController extends Controller
 
         $validated = $request->validated();
 
+        $newRole = $validated['role']
+            ?? $user->getRoleNames()->first();
+
+        $newActiveState = $request->has('is_active')
+            ? $request->boolean('is_active')
+            : $user->is_active;
+
+        $this->ensureRoleCanBeAssigned(
+            $request,
+            $newRole
+        );
+
+        if (
+            $request->user()->is($user)
+            && !$newActiveState
+        ) {
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'You cannot deactivate your own account.'
+                );
+        }
+
+        $this->ensureLastSuperAdminRemains(
+            $user,
+            $newRole,
+            $newActiveState
+        );
+
         $user->name = $validated['name'];
         $user->email = $validated['email'];
 
@@ -164,16 +213,9 @@ class UserController extends Controller
             $user->password = Hash::make($validated['password']);
         }
 
-        if (
-            $request->user()->is($user)
-            && !$request->boolean('is_active')
-        ) {
-            return back()
-                ->withInput()
-                ->with('error', 'You cannot deactivate your own account.');
-        }
 
-        $user->is_active = $request->boolean('is_active');
+
+        $user->is_active = $newActiveState;
 
         $user->save();
 
@@ -224,6 +266,13 @@ class UserController extends Controller
 
         $this->protectSuperAdmin($user);
 
+        if ($this->isLastSuperAdmin($user)) {
+            return back()->with(
+                'error',
+                'The final super administrator cannot be deleted.'
+            );
+        }
+
         $activityLogService->log(
             'User deleted',
             $user,
@@ -268,5 +317,53 @@ class UserController extends Controller
             )
             ->orderBy('name')
             ->get();
+    }
+
+    private function ensureRoleCanBeAssigned(
+        Request $request,
+        ?string $role
+    ): void {
+        if (
+            $role === 'super_admin'
+            && !$request->user()->hasRole('super_admin')
+        ) {
+            abort(403);
+        }
+    }
+
+    private function isLastSuperAdmin(User $user): bool
+    {
+        if (!$user->hasRole('super_admin')) {
+            return false;
+        }
+
+        return User::role('super_admin')->count() <= 1;
+    }
+
+    private function ensureLastSuperAdminRemains(
+        User $user,
+        ?string $newRole = null,
+        ?bool $newActiveState = null
+    ): void {
+        if (!$this->isLastSuperAdmin($user)) {
+            return;
+        }
+
+        if (
+            $newRole !== null
+            && $newRole !== 'super_admin'
+        ) {
+            abort(
+                422,
+                'The final super administrator cannot be demoted.'
+            );
+        }
+
+        if ($newActiveState === false) {
+            abort(
+                422,
+                'The final super administrator cannot be deactivated.'
+            );
+        }
     }
 }

@@ -15,11 +15,11 @@
             <x-ui.card>
 
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-900">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
                         {{ str($role->name)->replace('_', ' ')->title() }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         Select the permissions this role should have.
                     </p>
                 </div>
@@ -29,7 +29,8 @@
                     @foreach ($permissions as $group => $groupPermissions)
                         <div>
 
-                            <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                            <h3
+                                class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ str($group)->title() }}
                             </h3>
 
@@ -37,15 +38,19 @@
 
                                 @foreach ($groupPermissions as $permission)
                                     <label
-                                        class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50">
+                                        class="flex cursor-pointer items-center gap-3 rounded-xl border
+        border-slate-200 p-4 transition hover:bg-slate-50
+        dark:border-slate-800 dark:hover:bg-slate-800/60">
 
-                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                        <<input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
                                             @checked(in_array($permission->name, old('permissions', $role->permissions->pluck('name')->all())))
-                                            class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                                            class="rounded border-slate-300 text-brand-600 focus:ring-brand-500
+        dark:border-slate-700 dark:bg-slate-900
+        dark:checked:border-brand-600 dark:checked:bg-brand-600">
 
-                                        <span class="text-sm font-medium text-slate-700">
-                                            {{ str($permission->name)->after('.')->replace('_', ' ')->title() }}
-                                        </span>
+                                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                {{ str($permission->name)->after('.')->replace('_', ' ')->title() }}
+                                            </span>
 
                                     </label>
                                 @endforeach
@@ -64,10 +69,9 @@
                         Save Permissions
                     </x-ui.button>
 
-                    <a href="{{ route('admin.roles.index') }}"
-                        class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    <x-ui.button :href="route('admin.roles.index')" variant="secondary">
                         Cancel
-                    </a>
+                    </x-ui.button>
 
                 </div>
 

@@ -4,7 +4,10 @@
 
     @forelse ($documents as $document)
         <div
-            class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            class="flex flex-col gap-3 rounded-xl border border-slate-200
+    bg-white px-4 py-3
+    dark:border-slate-800 dark:bg-slate-900
+    sm:flex-row sm:items-center sm:justify-between">
 
             <div class="min-w-0">
 
@@ -12,7 +15,7 @@
 
                     <x-heroicon-o-document class="size-5 shrink-0 text-slate-400" />
 
-                    <p class="truncate text-sm font-medium text-slate-900">
+                    <p class="truncate text-sm font-medium text-slate-900 dark:text-white">
                         {{ $document->original_name }}
                     </p>
 
@@ -70,7 +73,7 @@
         <div class="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center">
             <x-heroicon-o-document class="mx-auto size-8 text-slate-300" />
 
-            <p class="mt-3 text-sm font-medium text-slate-900">
+            <p class="mt-3 text-sm font-medium text-slate-900 dark:text-white">
                 No documents uploaded
             </p>
 

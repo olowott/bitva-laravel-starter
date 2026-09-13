@@ -9,6 +9,7 @@ use App\Services\SettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\ActivityLogService;
+use App\Services\Branding\BrandingAssetService;
 
 class SettingsController extends Controller
 {
@@ -31,21 +32,47 @@ class SettingsController extends Controller
     public function update(
         UpdateSettingsRequest $request,
         SettingService $settingService,
-        ActivityLogService $activityLogService
+        ActivityLogService $activityLogService,
+        BrandingAssetService $brandingAssetService
     ): RedirectResponse {
-
         $validated = $request->validated();
 
+        $settings = collect($validated)
+            ->except([
+                'logo',
+                'favicon',
+            ])
+            ->toArray();
+
+        $trackedKeys = [
+            ...array_keys($settings),
+            'logo',
+            'favicon',
+        ];
+
         $before = Setting::query()
-            ->whereIn('key', array_keys($validated))
+            ->whereIn('key', $trackedKeys)
             ->pluck('value', 'key')
             ->toArray();
 
+        $settingService->setMany($settings);
 
-        $settingService->setMany($validated);
+        if ($request->hasFile('logo')) {
+            $brandingAssetService->store(
+                'logo',
+                $request->file('logo')
+            );
+        }
+
+        if ($request->hasFile('favicon')) {
+            $brandingAssetService->store(
+                'favicon',
+                $request->file('favicon')
+            );
+        }
 
         $after = Setting::query()
-            ->whereIn('key', array_keys($validated))
+            ->whereIn('key', $trackedKeys)
             ->pluck('value', 'key')
             ->toArray();
 
@@ -67,5 +94,57 @@ class SettingsController extends Controller
                 'success',
                 'Settings updated successfully.'
             );
+    }
+
+    public function removeLogo(
+        BrandingAssetService $brandingAssetService,
+        ActivityLogService $activityLogService
+    ): RedirectResponse {
+        $before = setting('logo');
+
+        $brandingAssetService->remove('logo');
+
+        if ($before) {
+            $activityLogService->log(
+                'Application logo removed',
+                null,
+                [
+                    'before' => $before,
+                    'after' => null,
+                ],
+                'deleted'
+            );
+        }
+
+        return back()->with(
+            'success',
+            'Application logo removed successfully.'
+        );
+    }
+
+    public function removeFavicon(
+        BrandingAssetService $brandingAssetService,
+        ActivityLogService $activityLogService
+    ): RedirectResponse {
+        $before = setting('favicon');
+
+        $brandingAssetService->remove('favicon');
+
+        if ($before) {
+            $activityLogService->log(
+                'Application favicon removed',
+                null,
+                [
+                    'before' => $before,
+                    'after' => null,
+                ],
+                'deleted'
+            );
+        }
+
+        return back()->with(
+            'success',
+            'Application favicon removed successfully.'
+        );
     }
 }

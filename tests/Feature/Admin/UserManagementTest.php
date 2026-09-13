@@ -7,6 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use App\Notifications\SystemNotification;
+use Illuminate\Support\Facades\Notification;
 
 class UserManagementTest extends TestCase
 {
@@ -343,5 +345,181 @@ class UserManagementTest extends TestCase
                 'Zulu User',
                 'Alpha User',
             ]);
+    }
+
+    public function test_admin_cannot_edit_a_super_admin(): void
+    {
+        $this->seed(
+            \Database\Seeders\RolePermissionSeeder::class
+        );
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $superAdmin = User::factory()->create();
+        $superAdmin->assignRole('super_admin');
+
+        $response = $this
+            ->actingAs($admin)
+            ->get(
+                route('admin.users.edit', $superAdmin)
+            );
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_cannot_assign_super_admin_role(): void
+    {
+        $this->seed(
+            \Database\Seeders\RolePermissionSeeder::class
+        );
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $admin->givePermissionTo([
+            'users.create',
+            'roles.manage',
+        ]);
+
+        $response = $this
+            ->actingAs($admin)
+            ->post(
+                route('admin.users.store'),
+                [
+                    'name' => 'Unauthorized Super Admin',
+                    'email' => 'fake-superadmin@example.com',
+                    'password' => 'Password123!',
+                    'password_confirmation' => 'Password123!',
+                    'is_active' => true,
+                    'role' => 'super_admin',
+                ]
+            );
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'fake-superadmin@example.com',
+        ]);
+    }
+
+    public function test_final_super_admin_cannot_be_demoted(): void
+    {
+        $this->seed(
+            \Database\Seeders\RolePermissionSeeder::class
+        );
+
+        $superAdmin = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $superAdmin->assignRole('super_admin');
+
+        $response = $this
+            ->actingAs($superAdmin)
+            ->put(
+                route('admin.users.update', $superAdmin),
+                [
+                    'name' => $superAdmin->name,
+                    'email' => $superAdmin->email,
+                    'is_active' => true,
+                    'role' => 'user',
+                ]
+            );
+
+        $response->assertStatus(422);
+
+        $superAdmin->refresh();
+
+        $this->assertTrue(
+            $superAdmin->hasRole('super_admin')
+        );
+    }
+
+
+
+    public function test_omitting_active_status_does_not_deactivate_user(): void
+    {
+        $this->seed(
+            \Database\Seeders\RolePermissionSeeder::class
+        );
+
+        $superAdmin = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $superAdmin->assignRole('super_admin');
+
+        $user = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $user->assignRole('user');
+
+        $response = $this
+            ->actingAs($superAdmin)
+            ->put(
+                route('admin.users.update', $user),
+                [
+                    'name' => 'Updated User',
+                    'email' => $user->email,
+                    'role' => 'user',
+
+                    // deliberately no is_active
+                ]
+            );
+
+        $response->assertSessionHasNoErrors();
+
+        $user->refresh();
+
+        $this->assertTrue($user->is_active);
+    }
+
+    public function test_new_user_receives_account_created_notification(): void
+    {
+        Notification::fake();
+
+        $this->seed(
+            \Database\Seeders\RolePermissionSeeder::class
+        );
+
+        $superAdmin = User::factory()->create();
+        $superAdmin->assignRole('super_admin');
+
+        $response = $this
+            ->actingAs($superAdmin)
+            ->post(
+                route('admin.users.store'),
+                [
+                    'name' => 'New User',
+                    'email' => 'newuser@example.com',
+                    'password' => 'Password123!',
+                    'password_confirmation' => 'Password123!',
+                    'is_active' => true,
+                    'role' => 'user',
+                ]
+            );
+
+        $response->assertRedirect(
+            route('admin.users.index')
+        );
+
+        $user = User::where(
+            'email',
+            'newuser@example.com'
+        )->firstOrFail();
+
+        Notification::assertSentTo(
+            $user,
+            SystemNotification::class,
+            function ($notification) use ($user) {
+                return $notification->title
+                    === 'Your account has been created'
+                    && $notification->sendEmail === true
+                    && $notification->via($user)
+                    === ['database', 'mail'];
+            }
+        );
     }
 }

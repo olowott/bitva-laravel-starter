@@ -59,6 +59,19 @@ class UpdateSettingsRequest extends FormRequest
                 'required',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
             ],
+            'logo' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+
+            'favicon' => [
+                'nullable',
+                'image',
+                'mimes:png',
+                'max:512',
+            ],
         ];
     }
 }

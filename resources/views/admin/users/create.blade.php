@@ -18,22 +18,21 @@
                 <x-form.input name="email" label="Email Address" type="email" required />
 
                 @can('roles.manage')
-
                     <div>
-                        <x-form.label for="role" value="Role" />
 
-                        <select id="role" name="role"
-                            class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+
+                        <x-form.select name="role" label="Role" required>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->name }}" @selected(old('role', 'user') === $role->name)>
                                     {{ str($role->name)->replace('_', ' ')->title() }}
                                 </option>
                             @endforeach
-                        </select>
+                        </x-form.select>
+
+
 
                         <x-form.error :messages="$errors->get('role')" />
                     </div>
-
                 @endcan
 
                 <x-form.input name="password" label="Password" type="password" required autocomplete="new-password" />
@@ -45,10 +44,9 @@
 
                 <div class="flex justify-end gap-3">
 
-                    <a href="{{ route('admin.users.index') }}"
-                        class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    <x-ui.button :href="route('admin.users.index')" variant="secondary">
                         Cancel
-                    </a>
+                    </x-ui.button>
 
                     <x-ui.button type="submit">
                         Create User

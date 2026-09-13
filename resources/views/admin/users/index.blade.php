@@ -19,26 +19,14 @@
 
             @endcan
             @can('users.create')
-                    <a href="{{ route('admin.users.create') }}">
-                        <x-ui.button>
-                            Add User
-                        </x-ui.button>
-                    </a>
+                   <x-ui.button :href="route('admin.users.create')">
+    Add User
+</x-ui.button>
             @endcan
         </x-slot:actions>
     </x-layout.page-header>
 
-    @if (session('success'))
-        <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {{ session('success') }}
-        </div>
-    @endif
 
-    @if (session('error'))
-        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
 
     <x-ui.filter-panel :action="route('admin.users.index')" class="mt-6">
 
@@ -52,21 +40,20 @@
     </div>
 
     <div>
-        <x-form.select
-            name="role"
-            label="Role"
+      <x-form.select
+    name="role"
+    label="Role"
+    required
+>
+    @foreach ($roles as $role)
+        <option
+            value="{{ $role->name }}"
+            @selected(old('role', 'user') === $role->name)
         >
-            <option value="">All roles</option>
-
-            @foreach ($roles as $role)
-                <option
-                    value="{{ $role->name }}"
-                    @selected(request('role') === $role->name)
-                >
-                    {{ str($role->name)->replace('_', ' ')->title() }}
-                </option>
-            @endforeach
-        </x-form.select>
+            {{ str($role->name)->replace('_', ' ')->title() }}
+        </option>
+    @endforeach
+</x-form.select>
     </div>
 
     <div>
@@ -103,13 +90,10 @@
             || request()->filled('role')
             || request()->filled('status')
         )
-            <a
-                href="{{ route('admin.users.index') }}"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-            >
-                <x-heroicon-o-x-mark class="mr-2 size-4" />
-                Clear
-            </a>
+          <x-ui.button :href="route('admin.users.index')"     variant="secondary">
+     <x-heroicon-o-x-mark class="mr-2 size-4" />
+        Clear
+</x-ui.button>
         @endif
     </div>
 
@@ -179,11 +163,11 @@
 
                         <x-table.cell>
 
-                            <div class="font-medium text-slate-900">
+                            <div class="font-medium text-slate-900 dark:text-white">
                                 {{ $user->name }}
                             </div>
 
-                            <div class="mt-1 text-slate-500">
+                            <div class="mt-1 text-slate-500 dark:text-slate-400">
                                 {{ $user->email }}
                             </div>
 
@@ -230,7 +214,7 @@
                         </x-table.cell>
 
 
-                        <x-table.cell class="whitespace-nowrap text-slate-500">
+                        <x-table.cell class="whitespace-nowrap text-slate-500 dark:text-slate-400">
 
                             {{ $user->created_at->format('d M Y') }}
 
@@ -245,7 +229,9 @@
 
                                     <a
                                         href="{{ route('admin.users.edit', $user) }}"
-                                        class="text-sm font-medium text-brand-600 transition hover:text-brand-700"
+                                       class="text-sm font-medium text-brand-600 transition
+    hover:text-brand-700
+    dark:text-brand-400 dark:hover:text-brand-300"
                                     >
                                         Edit
                                     </a>
@@ -267,7 +253,9 @@
 
                                             <button
                                                 type="submit"
-                                                class="text-sm font-medium text-red-600 transition hover:text-red-700"
+                                                class="text-sm font-medium text-red-600 transition
+    hover:text-red-700
+    dark:text-red-400 dark:hover:text-red-300"
                                             >
                                                 Delete
                                             </button>

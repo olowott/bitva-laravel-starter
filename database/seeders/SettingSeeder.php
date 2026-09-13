@@ -58,6 +58,18 @@ class SettingSeeder extends Seeder
                 'type' => 'color',
                 'group' => 'branding',
             ],
+            [
+                'key' => 'logo',
+                'value' => null,
+                'type' => 'image',
+                'group' => 'branding',
+            ],
+            [
+                'key' => 'favicon',
+                'value' => null,
+                'type' => 'image',
+                'group' => 'branding',
+            ],
         ];
 
         foreach ($settings as $setting) {

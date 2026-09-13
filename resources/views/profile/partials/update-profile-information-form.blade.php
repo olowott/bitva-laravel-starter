@@ -1,84 +1,117 @@
 <section>
+    <div class="border-b border-slate-200 pb-5 dark:border-slate-800">
 
-    <header>
-        <h2 class="text-base font-semibold text-slate-900">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white">
             Profile Information
         </h2>
 
-        <p class="mt-1 text-sm leading-6 text-slate-500">
-            Update your account's profile information and email address.
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Update your profile photo and personal information.
         </p>
-    </header>
 
+    </div>
 
-    <form id="send-verification" method="POST" action="{{ route('verification.send') }}">
+    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
-    </form>
+        @method('PATCH')
 
+        {{-- Avatar --}}
+        <div
+            class="flex flex-col gap-5 border-b border-slate-200 pb-6
+        dark:border-slate-800
+        sm:flex-row sm:items-center">
 
-    <form method="POST" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
-        @csrf
-        @method('patch')
+            <x-ui.avatar :user="$user" size="xl" />
 
+            <div>
+                <div class="flex flex-wrap items-center gap-3">
 
-        <x-form.input name="name" label="Name" :value="$user->name" required autofocus autocomplete="name" />
+                    <label for="avatar"
+                        class="inline-flex cursor-pointer items-center rounded-lg border
+        border-slate-300 bg-white px-3 py-2
+        text-sm font-medium text-slate-700 shadow-sm transition
+        hover:bg-slate-50
+        dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300
+        dark:hover:bg-slate-800">
+                        <x-heroicon-o-camera class="mr-2 h-4 w-4" />
 
+                        Change photo
+                    </label>
 
-        <div>
+                    <input id="avatar" name="avatar" type="file" accept=".jpg,.jpeg,.png,.webp" class="hidden">
 
-            <x-form.input name="email" label="Email Address" type="email" :value="$user->email" required
-                autocomplete="username" />
-
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
-
-                <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-
-                    <p class="text-sm text-amber-800">
-                        Your email address has not been verified.
-                    </p>
-
-                    <button form="send-verification"
-                        class="mt-2 text-sm font-semibold text-amber-800
-                               underline underline-offset-4
-                               hover:text-amber-900">
-                        Re-send verification email
-                    </button>
+                    @if ($user->avatar)
+                        <button type="submit" form="remove-avatar-form"
+                            class="text-sm font-medium text-red-600 hover:text-red-700
+    dark:text-red-400 dark:hover:text-red-300">
+                            Remove
+                        </button>
+                    @endif
 
                 </div>
 
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    JPG, PNG or WebP. Maximum 2 MB.
+                </p>
 
-                @if (session('status') === 'verification-link-sent')
-                    <div
-                        class="mt-3 rounded-xl border border-emerald-200
-                               bg-emerald-50 p-4">
-                        <p class="text-sm font-medium text-emerald-700">
-                            A new verification link has been sent to your email address.
-                        </p>
-                    </div>
-                @endif
+                <x-form.error name="avatar" class="mt-2" />
+            </div>
+        </div>
 
-            @endif
+        {{-- Fields --}}
+        <div class="mt-6 grid gap-6 md:grid-cols-2">
+
+            <x-form.input name="name" label="Full name" type="text" :value="old('name', $user->name)" required autofocus />
+
+            <x-form.input name="email" label="Email address" type="email" :value="old('email', $user->email)" required />
+
+            <x-form.input name="phone" label="Phone" type="text" :value="old('phone', $user->phone)" />
+
+            <x-form.input name="job_title" label="Job title" type="text" :value="old('job_title', $user->job_title)" />
+
+            <div class="md:col-span-2">
+
+                <x-form.textarea name="bio" label="Bio" rows="4" :value="old('bio', $user->bio)" />
+
+                <div class="mt-1 flex justify-end">
+                    <span class="text-xs text-slate-400 dark:text-slate-500">
+                        Maximum 1,000 characters
+                    </span>
+                </div>
+
+            </div>
 
         </div>
 
+        {{-- Email verification --}}
+        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
+            <x-ui.alert type="warning" class="mt-6">
+                Your email address has not been verified.
 
-        <div class="flex items-center gap-4">
+                <button form="send-verification" class="ml-1 font-medium underline">
+                    Resend verification email
+                </button>
+            </x-ui.alert>
+        @endif
 
+        <div class="mt-6 flex items-center gap-4">
             <x-ui.button type="submit">
-                Save Changes
+                Save changes
             </x-ui.button>
-
-
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2500)"
-                    class="text-sm font-medium text-emerald-600">
-                    Saved successfully.
-                </p>
-            @endif
-
         </div>
 
     </form>
 
+    @if ($user->avatar)
+        <form id="remove-avatar-form" method="POST" action="{{ route('profile.avatar.destroy') }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+
+    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
+        <form id="send-verification" method="POST" action="{{ route('verification.send') }}" class="hidden">
+            @csrf
+        </form>
+    @endif
 </section>

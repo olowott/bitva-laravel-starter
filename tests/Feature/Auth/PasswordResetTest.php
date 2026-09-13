@@ -39,7 +39,7 @@ class PasswordResetTest extends TestCase
         $this->post('/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
+            $response = $this->get('/reset-password/' . $notification->token);
 
             $response->assertStatus(200);
 
@@ -70,4 +70,22 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_password_reset_link_requests_are_rate_limited(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('password.email'), [
+                'email' => $user->email,
+            ]);
+        }
+
+        $this
+            ->post(route('password.email'), [
+                'email' => $user->email,
+            ])
+            ->assertStatus(429);
+    }
+
 }

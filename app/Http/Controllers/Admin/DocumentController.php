@@ -11,6 +11,7 @@ use App\Services\DocumentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -60,11 +61,18 @@ class DocumentController extends Controller
         );
 
         abort_unless(
-            \Storage::disk($document->disk)->exists($document->path),
+            $document->disk === 'local',
             404
         );
 
-        return \Storage::disk($document->disk)->download(
+        $disk = Storage::disk('local');
+
+        abort_unless(
+            $disk->exists($document->path),
+            404
+        );
+
+        return $disk->download(
             $document->path,
             $document->original_name
         );

@@ -1,11 +1,11 @@
 <section>
 
     <header>
-        <h2 class="text-base font-semibold text-slate-900">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white">
             Update Password
         </h2>
 
-        <p class="mt-1 text-sm leading-6 text-slate-500">
+        <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
             Use a strong password to help keep your account secure.
         </p>
     </header>
@@ -37,7 +37,7 @@
 
             @if (session('status') === 'password-updated')
                 <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2500)"
-                    class="text-sm font-medium text-emerald-600">
+                    class="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                     Password updated.
                 </p>
             @endif

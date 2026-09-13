@@ -15,7 +15,10 @@
     ]);
 @endphp
 
-<a href="{{ $url }}" class="inline-flex items-center gap-1.5 transition hover:text-slate-700">
+<a href="{{ $url }}"
+    class="inline-flex items-center gap-1.5 transition
+        hover:text-slate-700
+        dark:hover:text-slate-200">
     <span>
         {{ $label }}
     </span>
@@ -28,7 +31,7 @@
             <x-heroicon-o-chevron-down class="size-3.5" />
         @endif
     @else
-        <x-heroicon-o-chevron-up-down class="size-3.5 text-slate-300" />
+        <x-heroicon-o-chevron-up-down class="size-3.5 text-slate-300 dark:text-slate-600" />
 
     @endif
 </a>

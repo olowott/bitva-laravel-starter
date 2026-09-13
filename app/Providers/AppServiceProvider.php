@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Gate;
 use App\Services\SettingService;
 use App\View\Composers\TopbarComposer;
 use Illuminate\Support\Facades\View;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +30,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        RateLimiter::for('notifications', function (Request $request) {
+            return Limit::perMinute(10)
+                ->by(
+                    $request->user()?->id
+                    ?? $request->ip()
+                );
+        });
+
+        RateLimiter::for('exports', function (Request $request) {
+            return Limit::perMinute(20)
+                ->by(
+                    $request->user()?->id
+                    ?? $request->ip()
+                );
+        });
+
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super_admin')
                 ? true

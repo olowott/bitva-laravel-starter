@@ -139,4 +139,102 @@ class NotificationManagementTest extends TestCase
             route('login')
         );
     }
+
+    public function test_notification_can_redirect_to_local_url(): void
+    {
+        $user = User::factory()->create();
+
+        $notification = new \App\Notifications\SystemNotification(
+            title: 'Test',
+            message: 'Test notification',
+            url: '/profile',
+        );
+
+        $user->notify($notification);
+
+        $storedNotification = $user
+            ->notifications()
+            ->first();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(
+                route(
+                    'admin.notifications.read',
+                    $storedNotification->id
+                )
+            );
+
+        $response->assertRedirect('/profile');
+
+        $this->assertNotNull(
+            $storedNotification->fresh()->read_at
+        );
+    }
+
+    public function test_notification_does_not_redirect_to_external_url(): void
+    {
+        $user = User::factory()->create();
+
+        $notification = new SystemNotification(
+            title: 'Test',
+            message: 'Test notification',
+            url: 'https://example.com',
+        );
+
+        $user->notify($notification);
+
+        $storedNotification = $user
+            ->notifications()
+            ->first();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(
+                route(
+                    'admin.notifications.read',
+                    $storedNotification->id
+                )
+            );
+
+        $response->assertRedirect(
+            route('admin.notifications.index')
+        );
+    }
+
+    public function test_notification_does_not_redirect_to_protocol_relative_url(): void
+    {
+        $user = User::factory()->create();
+
+        $user->notify(
+            new SystemNotification(
+                title: 'Test',
+                message: 'Test notification',
+                url: '//example.com',
+            )
+        );
+
+        $storedNotification = $user
+            ->notifications()
+            ->first();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(
+                route(
+                    'admin.notifications.read',
+                    $storedNotification->id
+                )
+            );
+
+        $response->assertRedirect(
+            route('admin.notifications.index')
+        );
+
+        $this->assertNotNull(
+            $storedNotification->fresh()->read_at
+        );
+    }
+
+
 }

@@ -7,6 +7,10 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    @if (setting('favicon'))
+        <link rel="icon" type="image/png" href="{{ Storage::disk('public')->url(setting('favicon')) }}">
+    @endif
+
     <title>
         @hasSection('title')
             @yield('title') |
@@ -14,6 +18,25 @@
 
         {{ setting('app_name', config('app.name')) }}
     </title>
+
+    <script>
+        (() => {
+            const appearance = localStorage.getItem('appearance') || 'system';
+
+            const prefersDark = window.matchMedia(
+                '(prefers-color-scheme: dark)'
+            ).matches;
+
+            const dark =
+                appearance === 'dark' ||
+                (appearance === 'system' && prefersDark);
+
+            document.documentElement.classList.toggle(
+                'dark',
+                dark
+            );
+        })();
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -36,6 +59,8 @@
             <x-layout.topbar />
 
             <main class="px-4 py-6 sm:px-6 lg:px-8">
+
+                <x-layout.flash-messages />
 
                 @yield('content')
 

@@ -12,11 +12,16 @@ use App\Http\Controllers\Admin\NotificationController;
 
 use App\Http\Controllers\Admin\Exports\UserExportController;
 use App\Http\Controllers\Admin\Exports\ActivityLogExportController;
+use App\Http\Controllers\Admin\NotificationComposerController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 });
+
+
 
 
 Route::middleware(['auth', 'active'])->group(function () {
@@ -27,14 +32,19 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('verified')
         ->name('dashboard');
 
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
     Route::patch('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
 
+    Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])
+        ->name('profile.avatar.destroy');
+
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
 });
 
 Route::middleware(['auth', 'active', 'verified'])
@@ -44,8 +54,18 @@ Route::middleware(['auth', 'active', 'verified'])
 
         //EXPORT
         Route::get('/users/export', UserExportController::class)
-            ->middleware('can:users.export')
+            ->middleware([
+                'can:users.export',
+                'throttle:exports',
+            ])
             ->name('users.export');
+
+        Route::get('/activity/export', ActivityLogExportController::class)
+            ->middleware([
+                'can:activity.export',
+                'throttle:exports',
+            ])
+            ->name('activity.export');
 
         //USERS
     
@@ -108,20 +128,28 @@ Route::middleware(['auth', 'active', 'verified'])
             ->middleware('can:settings.manage')
             ->name('settings.update');
 
+        Route::delete(
+            '/settings/logo',
+            [SettingsController::class, 'removeLogo']
+        )
+            ->middleware('can:settings.manage')
+            ->name('settings.logo.destroy');
+
+        Route::delete(
+            '/settings/favicon',
+            [SettingsController::class, 'removeFavicon']
+        )
+            ->middleware('can:settings.manage')
+            ->name('settings.favicon.destroy');
+
         //ACTIVITY LOG
     
-        Route::get(
-            '/activity/export',
-            ActivityLogExportController::class
-        )->middleware('can:activity.export')->name('activity.export');
-
         Route::get('/activity', [ActivityLogController::class, 'index'])
             ->middleware('can:activity.view')
             ->name('activity.index');
 
         //NOTIFICATIONS
     
-
         Route::get(
             '/notifications',
             [NotificationController::class, 'index']
@@ -140,9 +168,22 @@ Route::middleware(['auth', 'active', 'verified'])
         )
             ->name('notifications.read');
 
+        Route::get(
+            '/notifications/create',
+            [NotificationComposerController::class, 'create']
+        )
+            ->middleware('can:notifications.send')
+            ->name('notifications.create');
 
-
-
+        Route::post(
+            '/notifications/send',
+            [NotificationComposerController::class, 'store']
+        )
+            ->middleware([
+                'can:notifications.send',
+                'throttle:notifications',
+            ])
+            ->name('notifications.send');
 
     });
 

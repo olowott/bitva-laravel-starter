@@ -34,14 +34,18 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        $url = data_get(
-            $notification->data,
-            'url'
-        );
+        $url = $notification->data['url'] ?? null;
 
-        return $url
-            ? redirect()->to($url)
-            : back();
+        if (
+            $url &&
+            str_starts_with($url, '/') &&
+            !str_starts_with($url, '//')
+        ) {
+            return redirect($url);
+        }
+
+        return redirect()
+            ->route('admin.notifications.index');
     }
 
     public function readAll(Request $request): RedirectResponse
