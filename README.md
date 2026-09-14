@@ -581,6 +581,28 @@ MAIL_MAILER=smtp
 
 Production SMTP credentials should exist only in the server's `.env`.
 
+### Super Admin Setup
+
+The starter does not ship with default administrator credentials.
+
+To create the initial super administrator, set the following values in `.env` before running the database seeder:
+
+````env
+SUPER_ADMIN_NAME="Super Admin"
+SUPER_ADMIN_EMAIL=admin@example.com
+SUPER_ADMIN_PASSWORD="your-secure-password"
+
+
+```markdown
+### Initial Super Administrator
+
+Before the initial production seed, configure:
+
+```env
+SUPER_ADMIN_NAME="Super Admin"
+SUPER_ADMIN_EMAIL=admin@example.com
+SUPER_ADMIN_PASSWORD="use-a-strong-unique-password"
+
 ---
 
 ## Production Optimization
@@ -590,7 +612,7 @@ After deployment:
 ```bash
 php artisan migrate --force
 php artisan optimize
-```
+````
 
 Build frontend assets before deployment or on the production server:
 
